@@ -15,9 +15,6 @@ fn main() {
     stdweb::initialize();
 
     js! {
-        Module.exports = {
-            // TODO Add functions here
-            incrementArray: @{inc_vec}
-        }
+        Module.exports.incrementArray = @{inc_vec}
     }
 }
