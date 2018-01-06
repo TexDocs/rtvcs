@@ -1,6 +1,7 @@
 #![feature(try_from)]
 
-#[macro_use] extern crate stdweb;
+#[macro_use]
+extern crate stdweb;
 
 use stdweb::unstable::TryInto;
 use stdweb::Value;
