@@ -9,6 +9,6 @@ before_script:
   - which cargo-web || cargo install cargo-web
 script:
   - cargo fmt -- --write-mode=diff
-  - cargo web build --target-webasm --bin websocket_api_web
+  - cargo web build --target-webasm --bin rtvcs_web
   - cargo build --no-default-features
   - cargo test
