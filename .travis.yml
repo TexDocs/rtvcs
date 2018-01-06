@@ -4,7 +4,9 @@ rust:
 cache: cargo
 before_script:
   - export PATH="$PATH:$HOME/.cargo/bin"
+  - rustup target add wasm32-unknown-unknown
   - (which rustfmt && cargo fmt --version) || cargo install rustfmt-nightly --force
+  - which cargo-web || cargo install cargo-web
 script:
   - cargo fmt -- --write-mode=diff
   - cargo web build --target-webasm --bin websocket_api_web
