@@ -18,3 +18,4 @@ required-features = ["wasm"]
 
 [dependencies]
 stdweb = { version = "0.2.0", optional = true }
+uuid = "0.5"
