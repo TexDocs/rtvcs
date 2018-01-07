@@ -16,3 +16,5 @@ jobs:
       script: cargo build --no-default-features
     - stage: test
       script: cargo test
+notifications:
+    slack: texdocs:m3xqd0SKzaTsbTnT2qruaKYt
