@@ -7,8 +7,12 @@ before_script:
   - rustup target add wasm32-unknown-unknown
   - (which rustfmt && cargo fmt --version) || cargo install rustfmt-nightly --force
   - which cargo-web || cargo install cargo-web
-script:
-  - cargo fmt -- --write-mode=diff
-  - cargo web build --target-webasm --bin rtvcs_web
-  - cargo build --no-default-features
-  - cargo test
+jobs:
+  include:
+    - stage: lint
+      script: mkdir src/lib && cp src/commit.rs src/lib/ && cargo fmt -- --write-mode=diff
+    - stage: build
+      script: cargo web build --target-webasm --bin rtvcs_web
+      script: cargo build --no-default-features
+    - stage: test
+      script: cargo test
