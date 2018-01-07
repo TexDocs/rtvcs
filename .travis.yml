@@ -15,4 +15,4 @@ jobs:
       script: cargo web build --target-webasm --bin rtvcs_web
       script: cargo build --no-default-features
     - stage: test
-      script: cargo test
+      script: mkdir src/lib && cp src/commit.rs src/lib/ && cargo test
