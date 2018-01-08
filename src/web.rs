@@ -1,5 +1,7 @@
 #![feature(try_from)]
 
+#[cfg(test)]
+extern crate rand;
 #[macro_use]
 extern crate stdweb;
 extern crate uuid;

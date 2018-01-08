@@ -370,6 +370,55 @@ pub struct DeleteFileCommit {
     pub file: Uuid,
 }
 
+#[cfg(test)]
+use rand::{thread_rng, Rng};
+#[cfg(test)]
+fn generate_random_commit() -> CommitContent {
+    let mut rng = thread_rng();
+    let num: u8 = rng.gen_range(0, 3);
+
+    match num {
+        1 => CommitContent::InsertTextCommit(InsertTextCommit {
+            location: rng.gen_range(0, 30),
+            text: String::from("123456789123456789123456789"),
+            file: Uuid::nil(),
+        }),
+        2 => CommitContent::DeleteTextCommit(DeleteTextCommit {
+            location: rng.gen_range(0, 30),
+            length: rng.gen_range(0, 30),
+            file: Uuid::nil(),
+        }),
+        3 => CommitContent::AddFileCommit(AddFileCommit {
+            name: String::from(""),
+            content: None,
+            file: Uuid::nil(),
+        }),
+        _ => CommitContent::DeleteFileCommit(DeleteFileCommit {
+            name: String::from(""),
+            file: Uuid::nil(),
+        }),
+    }
+}
+
+#[test]
+fn shift_is_deterministic() {
+    let mut remote_commits = Vec::new();
+
+    for i in 0..10000 {
+        remote_commits.push(Commit::new(i, generate_random_commit()));
+    }
+
+    for _ in 0..1000 {
+        let commit = generate_random_commit();
+        let backwards_shifted_commit = commit.shift_backwards_multiple(&remote_commits);
+        let forwards_shifted_commit = commit.shift_forwards_multiple(&remote_commits);
+
+        if (forwards_shifted_commit.is_some()) {
+            assert_eq!(commit, forwards_shifted_commit.unwrap());
+        }
+    }
+}
+
 #[test]
 fn shift_commit() {
     let local_commits = vec![
