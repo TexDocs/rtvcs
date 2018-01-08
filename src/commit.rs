@@ -417,6 +417,15 @@ fn shift_is_deterministic() {
             assert_eq!(commit, forwards_shifted_commit.unwrap());
         }
     }
+
+    for _ in 0..1000 {
+        let commit = generate_random_commit();
+        let forwards_shifted_commit = commit.shift_forwards_multiple(&remote_commits);
+        if (forwards_shifted_commit.is_some()) {
+            let backwards_shifted_commit = forwards_shifted_commit.unwrap().shift_backwards_multiple(&remote_commits);
+            assert_eq!(commit, backwards_shifted_commit);
+        }
+    }
 }
 
 #[test]
