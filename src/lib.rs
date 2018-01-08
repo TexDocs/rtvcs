@@ -1,5 +1,5 @@
-extern crate uuid;
 #[cfg(test)]
 extern crate rand;
+extern crate uuid;
 
 pub mod commit;
