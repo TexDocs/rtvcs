@@ -3,6 +3,8 @@
 #[macro_use]
 extern crate stdweb;
 extern crate uuid;
+#[cfg(test)]
+extern crate rand;
 
 use stdweb::unstable::TryInto;
 use stdweb::Value;
