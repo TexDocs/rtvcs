@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
 pub struct Commit {
     pub id: u32,
     content: CommitContent,
@@ -59,7 +59,7 @@ pub fn insert_before(
     (new_version_vector, document_patch)
 }
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
 pub enum CommitContent {
     InsertTextCommit(InsertTextCommit),
     DeleteTextCommit(DeleteTextCommit),
@@ -307,7 +307,7 @@ impl CommitContent {
     }
 }
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
 pub struct InsertTextCommit {
     pub location: i64,
     pub text: String,
@@ -332,7 +332,7 @@ impl InsertTextCommit {
     }
 }
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
 pub struct DeleteTextCommit {
     pub location: i64,
     pub length: i64,
@@ -357,14 +357,14 @@ impl DeleteTextCommit {
     }
 }
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
 pub struct AddFileCommit {
     pub name: String,
     pub content: Option<Vec<u8>>,
     pub file: Uuid,
 }
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
 pub struct DeleteFileCommit {
     pub name: String,
     pub file: Uuid,
@@ -404,16 +404,20 @@ fn generate_random_commit() -> CommitContent {
 fn shift_is_deterministic() {
     let mut remote_commits = Vec::new();
 
-    for i in 0..10000 {
+    for i in 0..1 {
         remote_commits.push(Commit::new(i, generate_random_commit()));
     }
+
+    let mut some = false;
 
     for _ in 0..1000 {
         let commit = generate_random_commit();
         let backwards_shifted_commit = commit.shift_backwards_multiple(&remote_commits);
-        let forwards_shifted_commit = commit.shift_forwards_multiple(&remote_commits);
+        let forwards_shifted_commit =
+            backwards_shifted_commit.shift_forwards_multiple(&remote_commits);
 
-        if (forwards_shifted_commit.is_some()) {
+        if forwards_shifted_commit.is_some() {
+            some = true;
             assert_eq!(commit, forwards_shifted_commit.unwrap());
         }
     }
@@ -421,68 +425,14 @@ fn shift_is_deterministic() {
     for _ in 0..1000 {
         let commit = generate_random_commit();
         let forwards_shifted_commit = commit.shift_forwards_multiple(&remote_commits);
-        if (forwards_shifted_commit.is_some()) {
+        if forwards_shifted_commit.is_some() {
             let backwards_shifted_commit = forwards_shifted_commit
                 .unwrap()
                 .shift_backwards_multiple(&remote_commits);
+            some = true;
             assert_eq!(commit, backwards_shifted_commit);
         }
     }
-}
 
-#[test]
-fn shift_commit() {
-    let local_commits = vec![
-        Commit::new(
-            0,
-            CommitContent::InsertTextCommit(InsertTextCommit {
-                location: 0,
-                text: String::from("Hello World"),
-                file: Uuid::nil(),
-            }),
-        ),
-        Commit::new(
-            1,
-            CommitContent::InsertTextCommit(InsertTextCommit {
-                location: 11,
-                text: String::from(" This is a text."),
-                file: Uuid::nil(),
-            }),
-        ),
-    ];
-
-    let remote_commits = vec![
-        Commit::new(
-            0,
-            CommitContent::InsertTextCommit(InsertTextCommit {
-                location: 5,
-                text: String::from("Text at 5"),
-                file: Uuid::nil(),
-            }),
-        ),
-        Commit::new(
-            1,
-            CommitContent::InsertTextCommit(InsertTextCommit {
-                location: 9,
-                text: String::from(" Test with 9."),
-                file: Uuid::nil(),
-            }),
-        ),
-    ];
-
-    let shifted_commits = insert_before(remote_commits.clone(), local_commits);
-
-    for commit in shifted_commits.1 {
-        println!("{:?}", commit);
-    }
-
-    println!("----------------");
-    for commit in remote_commits {
-        println!("{:?}", commit);
-    }
-    for commit in shifted_commits.0 {
-        println!("{:?}", commit);
-    }
-
-    assert_eq!(2 + 2, 4);
+    assert_eq!(some, true);
 }
